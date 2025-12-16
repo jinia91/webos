@@ -80,7 +80,6 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
           const nodePath = node.fullPath;
           
           // 현재 경로까지의 경로인지 확인 (현재 경로 포함)
-          // nodePath가 targetPath의 부모 경로이거나 targetPath와 같아야 함
           const isOnPath = targetPath === nodePath || targetPath.startsWith(nodePath + '/');
           
           if (isOnPath && node.type === 'directory') {
@@ -140,7 +139,6 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
     expandAndLoadPath();
   }, [currentPath, fs]);
 
-
   const loadChildren = async (node: TreeNode): Promise<TreeNode[]> => {
     try {
       const childrenResult = fs.ls(node.fullPath);
@@ -194,7 +192,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
 
     const updatedTree = await updateTree(tree);
     setTree(updatedTree);
-  }, [tree, expandedPaths, fs]);
+  }, [tree, expandedPaths, fs, loadChildren]);
 
   const handleNodeClick = useCallback(async (node: TreeNode, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -216,7 +214,6 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
   const renderNode = useCallback((node: TreeNode, level: number = 0): React.ReactNode => {
     const isExpanded = expandedPaths.has(node.fullPath);
     const isCurrent = node.fullPath === currentPath;
-    const hasChildren = node.type === 'directory' && node.children && node.children.length > 0;
 
     return (
       <div key={node.fullPath} className="file-explorer-node">
@@ -256,4 +253,3 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
     </div>
   );
 };
-

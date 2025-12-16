@@ -16,19 +16,35 @@ import {
   dateCommand,
   createHistoryCommand,
   createHelpCommand,
+  createVimCommand,
 } from './commands';
 
 export type { CommandResult } from './commands/types';
+
+export interface VimCommandContext {
+  openVim: (filePath: string) => void;
+}
 
 export class CLI {
   private fs: IFileSystem;
   private history: string[] = [];
   private historyIndex: number = -1;
   private commands: Map<string, Command> = new Map();
+  private vimContext?: VimCommandContext;
 
-  constructor(fs: IFileSystem) {
+  constructor(fs: IFileSystem, vimContext?: VimCommandContext) {
     this.fs = fs;
+    this.vimContext = vimContext;
     this.initializeCommands();
+  }
+
+  setVimContext(context: VimCommandContext): void {
+    this.vimContext = context;
+    // vim 명령어 재등록
+    if (this.vimContext) {
+      const vimCommand = createVimCommand(this.vimContext);
+      this.commands.set(vimCommand.name, vimCommand);
+    }
   }
 
   private initializeCommands(): void {
@@ -70,6 +86,12 @@ export class CLI {
       ),
     });
     this.commands.set(helpCommand.name, helpCommand);
+
+    // vim 명령어 등록
+    if (this.vimContext) {
+      const vimCommand = createVimCommand(this.vimContext);
+      this.commands.set(vimCommand.name, vimCommand);
+    }
   }
 
   getHistory(): string[] {

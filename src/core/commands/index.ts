@@ -12,6 +12,7 @@ import { whoamiCommand } from './whoami';
 import { dateCommand } from './date';
 import { createHistoryCommand } from './history';
 import { createHelpCommand } from './help';
+import { createVimCommand } from './vim';
 import { Command } from './types';
 
 export {
@@ -28,6 +29,7 @@ export {
   dateCommand,
   createHistoryCommand,
   createHelpCommand,
+  createVimCommand,
 };
 
 export type { Command } from './types';
