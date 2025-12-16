@@ -17,6 +17,7 @@ import {
   createHistoryCommand,
   createHelpCommand,
   createVimCommand,
+  nodeCommand,
 } from './commands';
 
 export type { CommandResult } from './commands/types';
@@ -61,6 +62,7 @@ export class CLI {
       clearCommand,
       whoamiCommand,
       dateCommand,
+      nodeCommand,
     ];
 
     // 기본 명령어 등록

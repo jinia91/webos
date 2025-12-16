@@ -13,6 +13,7 @@ import { dateCommand } from './date';
 import { createHistoryCommand } from './history';
 import { createHelpCommand } from './help';
 import { createVimCommand } from './vim';
+import { nodeCommand } from './node';
 import { Command } from './types';
 
 export {
@@ -30,6 +31,7 @@ export {
   createHistoryCommand,
   createHelpCommand,
   createVimCommand,
+  nodeCommand,
 };
 
 export type { Command } from './types';
