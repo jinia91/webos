@@ -1,11 +1,11 @@
 import { Command, CommandResult } from './types';
-import { FileSystem } from '../FileSystem';
+import { IFileSystem } from '../filesystem/IFileSystem';
 
 export const rmCommand: Command = {
   name: 'rm',
   description: '파일/디렉토리 삭제',
   usage: 'rm [-r] <경로>',
-  execute: (fs: FileSystem, args: string[]): CommandResult => {
+  execute: async (fs: IFileSystem, args: string[]): Promise<CommandResult> => {
     try {
       if (args.length === 0) {
         return { output: '', error: '사용법: rm [-r] <파일/디렉토리명>' };
@@ -15,7 +15,10 @@ export const rmCommand: Command = {
       if (!path) {
         return { output: '', error: '사용법: rm [-r] <파일/디렉토리명>' };
       }
-      fs.rm(path, recursive);
+      const rmResult = fs.rm(path, recursive);
+      if (rmResult instanceof Promise) {
+        await rmResult;
+      }
       return { output: '' };
     } catch (error) {
       return {

@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CLI, CommandResult } from '../core/CLI';
-import { FileSystem } from '../core/FileSystem';
+import { IFileSystem } from '../core/filesystem/IFileSystem';
 import './Terminal.css';
 
 interface TerminalProps {
-  fs: FileSystem;
+  fs: IFileSystem;
   cli: CLI;
+  onPathChange?: (path: string) => void;
 }
 
 interface OutputItem {
@@ -15,18 +16,26 @@ interface OutputItem {
   command?: string;
 }
 
-export const Terminal: React.FC<TerminalProps> = ({ fs, cli }) => {
+export const Terminal: React.FC<TerminalProps> = ({ fs, cli, onPathChange }) => {
   const [output, setOutput] = useState<Array<OutputItem>>([
     { type: 'output', content: 'WebOS 터미널에 오신 것을 환영합니다!\n\'help\'를 입력하여 사용 가능한 명령어를 확인하세요.\n' },
   ]);
   const [input, setInput] = useState('');
-  const [currentPath, setCurrentPath] = useState(fs.getCurrentPath());
+  const [currentPath, setCurrentPath] = useState<string>('/');
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setCurrentPath(fs.getCurrentPath());
-  }, [fs]);
+    const updatePath = async () => {
+      const pathResult = fs.getCurrentPath();
+      const path = pathResult instanceof Promise 
+        ? await pathResult 
+        : pathResult;
+      setCurrentPath(path);
+      onPathChange?.(path);
+    };
+    updatePath();
+  }, [fs, onPathChange]);
 
   useEffect(() => {
     if (outputRef.current) {
@@ -38,7 +47,7 @@ export const Terminal: React.FC<TerminalProps> = ({ fs, cli }) => {
     inputRef.current?.focus();
   }, []);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!input.trim()) {
@@ -46,7 +55,10 @@ export const Terminal: React.FC<TerminalProps> = ({ fs, cli }) => {
     }
 
     const command = input.trim();
-    const currentPathForCommand = fs.getCurrentPath();
+    const currentPathResult = fs.getCurrentPath();
+    const currentPathForCommand = currentPathResult instanceof Promise 
+      ? await currentPathResult 
+      : currentPathResult;
     
     // 명령어 출력 추가 (경로와 명령어 분리 저장)
     setOutput(prev => [...prev, { 
@@ -57,7 +69,7 @@ export const Terminal: React.FC<TerminalProps> = ({ fs, cli }) => {
     }]);
 
     // 명령어 실행
-    const result: CommandResult = cli.execute(command);
+    const result: CommandResult = await cli.execute(command);
 
     // clear 명령어 처리
     if (result.output === 'CLEAR') {
@@ -74,9 +86,14 @@ export const Terminal: React.FC<TerminalProps> = ({ fs, cli }) => {
     }
 
     // 경로 업데이트
-    setCurrentPath(fs.getCurrentPath());
+    const newPathResult = fs.getCurrentPath();
+    const newPath = newPathResult instanceof Promise 
+      ? await newPathResult 
+      : newPathResult;
+    setCurrentPath(newPath);
+    onPathChange?.(newPath);
     setInput('');
-  }, [input, cli, fs]);
+  }, [input, cli, fs, onPathChange]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowUp') {
@@ -94,10 +111,14 @@ export const Terminal: React.FC<TerminalProps> = ({ fs, cli }) => {
     }
   }, [cli]);
 
+  const handleContainerClick = useCallback(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
-    <div className="terminal-container">
-      <div className="terminal-body">
-        <div className="terminal-output" ref={outputRef}>
+    <div className="terminal-container" onClick={handleContainerClick}>
+      <div className="terminal-body" onClick={handleContainerClick}>
+        <div className="terminal-output" ref={outputRef} onClick={handleContainerClick}>
           {output.map((item, index) => (
             <div key={index} className={`terminal-line ${item.type}`}>
               {item.type === 'command' ? (

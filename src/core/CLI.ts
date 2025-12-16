@@ -1,6 +1,6 @@
 // CLI 명령어 처리 시스템
 
-import { FileSystem } from './FileSystem';
+import { IFileSystem } from './filesystem/IFileSystem';
 import { Command, CommandResult } from './commands/types';
 import {
   lsCommand,
@@ -21,12 +21,12 @@ import {
 export type { CommandResult } from './commands/types';
 
 export class CLI {
-  private fs: FileSystem;
+  private fs: IFileSystem;
   private history: string[] = [];
   private historyIndex: number = -1;
   private commands: Map<string, Command> = new Map();
 
-  constructor(fs: FileSystem) {
+  constructor(fs: IFileSystem) {
     this.fs = fs;
     this.initializeCommands();
   }
@@ -99,7 +99,7 @@ export class CLI {
     return null;
   }
 
-  execute(command: string): CommandResult {
+  async execute(command: string): Promise<CommandResult> {
     const trimmed = command.trim();
     if (!trimmed) {
       return { output: '' };
@@ -120,7 +120,9 @@ export class CLI {
     }
 
     try {
-      return commandHandler.execute(this.fs, args);
+      const result = commandHandler.execute(this.fs, args);
+      // Promise인 경우 await, 아닌 경우 그대로 반환
+      return result instanceof Promise ? await result : result;
     } catch (error) {
       return {
         output: '',

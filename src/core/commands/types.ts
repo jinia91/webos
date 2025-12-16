@@ -1,6 +1,6 @@
 // 명령어 인터페이스 정의
 
-import { FileSystem } from '../FileSystem';
+import { IFileSystem } from '../filesystem/IFileSystem';
 
 export interface CommandResult {
   output: string;
@@ -12,6 +12,6 @@ export interface Command {
   aliases?: string[];
   description: string;
   usage: string;
-  execute: (fs: FileSystem, args: string[]) => CommandResult;
+  execute: (fs: IFileSystem, args: string[]) => CommandResult | Promise<CommandResult>;
 }
 

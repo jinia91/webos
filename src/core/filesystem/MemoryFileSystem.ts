@@ -1,14 +1,8 @@
 // 메모리 기반 파일시스템 구현
 
-export interface FileNode {
-  name: string;
-  type: 'file' | 'directory';
-  content?: string;
-  children: Map<string, FileNode>;
-  parent?: FileNode;
-}
+import { IFileSystem, FileNode } from './IFileSystem';
 
-export class FileSystem {
+export class MemoryFileSystem implements IFileSystem {
   private root: FileNode;
   private currentPath: string[];
 
@@ -16,7 +10,7 @@ export class FileSystem {
     this.root = {
       name: '/',
       type: 'directory',
-      children: new Map(),
+      children: [],
     };
     this.currentPath = [];
     this.initializeDefaultStructure();
@@ -40,11 +34,11 @@ export class FileSystem {
   private getCurrentDirectory(): FileNode {
     let current = this.root;
     for (const segment of this.currentPath) {
-      const next = current.children.get(segment);
-      if (!next || next.type !== 'directory') {
+      const child = current.children?.find(c => c.name === segment);
+      if (!child || child.type !== 'directory') {
         throw new Error(`디렉토리를 찾을 수 없습니다: ${segment}`);
       }
-      current = next;
+      current = child;
     }
     return current;
   }
@@ -61,7 +55,7 @@ export class FileSystem {
             current = current.parent;
           }
         } else if (segment !== '.') {
-          const next = current.children.get(segment);
+          const next = current.children?.find(c => c.name === segment);
           if (!next) {
             throw new Error(`경로를 찾을 수 없습니다: ${path}`);
           }
@@ -79,7 +73,7 @@ export class FileSystem {
             current = current.parent;
           }
         } else if (segment !== '.') {
-          const next = current.children.get(segment);
+          const next = current.children?.find(c => c.name === segment);
           if (!next) {
             throw new Error(`경로를 찾을 수 없습니다: ${path}`);
           }
@@ -102,7 +96,7 @@ export class FileSystem {
             current = current.parent;
           }
         } else if (segment !== '.') {
-          const next = current.children.get(segment);
+          const next = current.children?.find(c => c.name === segment);
           if (!next) {
             throw new Error(`부모 경로를 찾을 수 없습니다: ${path}`);
           }
@@ -119,7 +113,7 @@ export class FileSystem {
             current = current.parent;
           }
         } else if (segment !== '.') {
-          const next = current.children.get(segment);
+          const next = current.children?.find(c => c.name === segment);
           if (!next) {
             throw new Error(`부모 경로를 찾을 수 없습니다: ${path}`);
           }
@@ -171,30 +165,38 @@ export class FileSystem {
       throw new Error(`${targetPath}는 디렉토리가 아닙니다`);
     }
 
-    return Array.from(node.children.values());
+    return node.children || [];
   }
 
   mkdir(path: string): void {
     const { parent, name } = this.resolveParentPath(path);
     
-    if (parent.children.has(name)) {
+    if (parent.children?.some(c => c.name === name)) {
       throw new Error(`이미 존재합니다: ${path}`);
+    }
+
+    if (!parent.children) {
+      parent.children = [];
     }
 
     const newDir: FileNode = {
       name,
       type: 'directory',
-      children: new Map(),
+      children: [],
       parent,
     };
-    parent.children.set(name, newDir);
+    parent.children.push(newDir);
   }
 
   writeFile(path: string, content: string): void {
     const { parent, name } = this.resolveParentPath(path);
     
-    if (parent.children.has(name)) {
-      const existing = parent.children.get(name)!;
+    if (!parent.children) {
+      parent.children = [];
+    }
+
+    const existing = parent.children.find(c => c.name === name);
+    if (existing) {
       if (existing.type === 'directory') {
         throw new Error(`${path}는 디렉토리입니다`);
       }
@@ -204,10 +206,9 @@ export class FileSystem {
         name,
         type: 'file',
         content,
-        children: new Map(),
         parent,
       };
-      parent.children.set(name, newFile);
+      parent.children.push(newFile);
     }
   }
 
@@ -228,11 +229,14 @@ export class FileSystem {
       throw new Error(`${path}는 디렉토리입니다. -r 옵션을 사용하세요`);
     }
 
-    if (!node.parent) {
+    if (!node.parent || !node.parent.children) {
       throw new Error('루트 디렉토리는 삭제할 수 없습니다');
     }
 
-    node.parent.children.delete(node.name);
+    const index = node.parent.children.findIndex(c => c.name === node.name);
+    if (index !== -1) {
+      node.parent.children.splice(index, 1);
+    }
   }
 
   cat(path: string): string {

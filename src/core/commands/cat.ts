@@ -1,16 +1,17 @@
 import { Command, CommandResult } from './types';
-import { FileSystem } from '../FileSystem';
+import { IFileSystem } from '../filesystem/IFileSystem';
 
 export const catCommand: Command = {
   name: 'cat',
   description: '파일 내용 출력',
   usage: 'cat <파일>',
-  execute: (fs: FileSystem, args: string[]): CommandResult => {
+  execute: async (fs: IFileSystem, args: string[]): Promise<CommandResult> => {
     try {
       if (args.length === 0) {
         return { output: '', error: '사용법: cat <파일명>' };
       }
-      const content = fs.cat(args[0]);
+      const contentResult = fs.cat(args[0]);
+      const content = contentResult instanceof Promise ? await contentResult : contentResult;
       return { output: content };
     } catch (error) {
       return {

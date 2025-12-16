@@ -1,16 +1,19 @@
 import { Command, CommandResult } from './types';
-import { FileSystem } from '../FileSystem';
+import { IFileSystem } from '../filesystem/IFileSystem';
 
 export const touchCommand: Command = {
   name: 'touch',
   description: '빈 파일 생성',
   usage: 'touch <파일>',
-  execute: (fs: FileSystem, args: string[]): CommandResult => {
+  execute: async (fs: IFileSystem, args: string[]): Promise<CommandResult> => {
     try {
       if (args.length === 0) {
         return { output: '', error: '사용법: touch <파일명>' };
       }
-      fs.writeFile(args[0], '');
+      const writeResult = fs.writeFile(args[0], '');
+      if (writeResult instanceof Promise) {
+        await writeResult;
+      }
       return { output: '' };
     } catch (error) {
       return {

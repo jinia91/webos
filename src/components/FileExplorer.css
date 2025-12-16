@@ -1,0 +1,96 @@
+.file-explorer {
+  width: 300px;
+  height: 100%;
+  background: #252526;
+  border-left: 1px solid #3e3e3e;
+  display: flex;
+  flex-direction: column;
+  color: #cccccc;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  font-size: 13px;
+}
+
+.file-explorer-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #3e3e3e;
+  background: #2d2d2d;
+}
+
+.file-explorer-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.file-explorer-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0;
+}
+
+.file-explorer-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.file-explorer-content::-webkit-scrollbar-track {
+  background: #252526;
+}
+
+.file-explorer-content::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.file-explorer-content::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+.file-explorer-tree {
+  user-select: none;
+}
+
+.file-explorer-node {
+  width: 100%;
+}
+
+.file-explorer-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  min-height: 24px;
+}
+
+.file-explorer-item:hover {
+  background: #2a2d2e;
+}
+
+.file-explorer-item.current {
+  background: #094771;
+  color: #ffffff;
+}
+
+.file-explorer-item.current:hover {
+  background: #0e639c;
+}
+
+.file-explorer-icon {
+  margin-right: 6px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.file-explorer-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-explorer-children {
+  margin-left: 0;
+}
+

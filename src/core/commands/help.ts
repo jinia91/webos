@@ -1,5 +1,5 @@
 import { Command, CommandResult } from './types';
-import { FileSystem } from '../FileSystem';
+import { IFileSystem } from '../filesystem/IFileSystem';
 
 export interface HelpCommandContext {
   getCommands: () => Command[];
@@ -9,7 +9,7 @@ export const createHelpCommand = (context: HelpCommandContext): Command => ({
   name: 'help',
   description: '도움말 출력',
   usage: 'help',
-  execute: (fs: FileSystem, args: string[]): CommandResult => {
+  execute: async (fs: IFileSystem, args: string[]): Promise<CommandResult> => {
     const commands = context.getCommands();
     const helpLines = commands.map(cmd => {
       const aliases = cmd.aliases ? ` / ${cmd.aliases.join(' / ')}` : '';

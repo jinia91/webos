@@ -1,20 +1,21 @@
 import React, { useState, useCallback } from 'react';
 import { Terminal } from './Terminal';
-import { FileSystem } from '../core/FileSystem';
+import { FileExplorer } from './FileExplorer';
+import { MemoryFileSystem, IFileSystem } from '../core/filesystem';
 import { CLI } from '../core/CLI';
 import './TabManager.css';
 
 interface Tab {
   id: string;
   name: string;
-  fs: FileSystem;
+  fs: IFileSystem;
   cli: CLI;
 }
 
 export const TabManager: React.FC = () => {
   const [tabs, setTabs] = useState<Tab[]>(() => {
     // 초기 탭 생성
-    const initialFs = new FileSystem();
+    const initialFs = new MemoryFileSystem();
     const initialCli = new CLI(initialFs);
     return [{
       id: '1',
@@ -24,20 +25,21 @@ export const TabManager: React.FC = () => {
     }];
   });
   const [activeTabId, setActiveTabId] = useState<string>('1');
-
-  const activeTab = tabs.find(tab => tab.id === activeTabId) || tabs[0];
+  const [currentPaths, setCurrentPaths] = useState<Record<string, string>>({ '1': '/' });
 
   const handleAddTab = useCallback(() => {
-    const newFs = new FileSystem();
+    const newFs = new MemoryFileSystem();
     const newCli = new CLI(newFs);
+    const newTabId = Date.now().toString();
     const newTab: Tab = {
-      id: Date.now().toString(),
+      id: newTabId,
       name: 'Terminal',
       fs: newFs,
       cli: newCli,
     };
     setTabs(prev => [...prev, newTab]);
-    setActiveTabId(newTab.id);
+    setCurrentPaths(prev => ({ ...prev, [newTabId]: '/' }));
+    setActiveTabId(newTabId);
   }, []);
 
   const handleCloseTab = useCallback((tabId: string, e: React.MouseEvent) => {
@@ -94,7 +96,36 @@ export const TabManager: React.FC = () => {
             key={tab.id}
             className={`terminal-wrapper ${tab.id === activeTabId ? 'active' : ''}`}
           >
-            <Terminal fs={tab.fs} cli={tab.cli} />
+            <div className="main-content">
+              <Terminal 
+                fs={tab.fs} 
+                cli={tab.cli}
+                onPathChange={(path) => {
+                  setCurrentPaths(prev => ({ ...prev, [tab.id]: path }));
+                }}
+              />
+              <FileExplorer
+                fs={tab.fs}
+                currentPath={currentPaths[tab.id] || '/'}
+                onPathChange={async (path) => {
+                  const cdResult = tab.fs.cd(path);
+                  if (cdResult instanceof Promise) {
+                    await cdResult;
+                  }
+                  const newPathResult = tab.fs.getCurrentPath();
+                  const newPath = newPathResult instanceof Promise 
+                    ? await newPathResult 
+                    : newPathResult;
+                  setCurrentPaths(prev => ({ ...prev, [tab.id]: newPath }));
+                  // 터미널에 cd 명령 실행
+                  await tab.cli.execute(`cd ${path}`);
+                }}
+                onFileOpen={async (path) => {
+                  // 터미널에 cat 명령 실행
+                  await tab.cli.execute(`cat ${path}`);
+                }}
+              />
+            </div>
           </div>
         ))}
       </div>
