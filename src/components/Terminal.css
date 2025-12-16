@@ -1,0 +1,149 @@
+.terminal-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #1e1e1e;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  font-size: 14px;
+  color: #d4d4d4;
+}
+
+.terminal-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 16px;
+}
+
+.terminal-output {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.terminal-output::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-output::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.terminal-output::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.terminal-output::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+.terminal-line {
+  margin-bottom: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.5;
+  min-height: 1.5em;
+  display: flex;
+  align-items: baseline;
+}
+
+.terminal-line.command {
+  margin-bottom: 0;
+}
+
+.command-prompt {
+  color: #d4d4d4;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre;
+}
+
+.command-prompt .user {
+  color: #4ec9b0;
+}
+
+.command-prompt .at {
+  color: #d4d4d4;
+}
+
+.command-prompt .host {
+  color: #4ec9b0;
+}
+
+.command-prompt .path {
+  color: #ce9178;
+}
+
+.command-prompt .symbol {
+  color: #d4d4d4;
+}
+
+.command-prompt .command-text {
+  color: #d4d4d4;
+}
+
+.output-text {
+  color: #d4d4d4;
+}
+
+.error-text {
+  color: #f48771;
+}
+
+.terminal-input-form {
+  display: flex;
+  align-items: baseline;
+  margin-top: 0;
+  line-height: 1.5;
+  min-height: 1.5em;
+}
+
+.prompt {
+  margin-right: 0;
+  flex-shrink: 0;
+  white-space: pre;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.prompt .user {
+  color: #4ec9b0;
+}
+
+.prompt .at {
+  color: #d4d4d4;
+}
+
+.prompt .host {
+  color: #4ec9b0;
+}
+
+.prompt .path {
+  color: #ce9178;
+}
+
+.prompt .symbol {
+  color: #d4d4d4;
+}
+
+.terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #d4d4d4;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  caret-color: #4ec9b0;
+  padding: 0;
+  margin: 0;
+}
+
+.terminal-input::selection {
+  background: #264f78;
+}
+
